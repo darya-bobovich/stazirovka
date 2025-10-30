@@ -1,8 +1,0 @@
-D:\stazirovka\zadaacha1\zadaacha1\bin\Debug\zadaacha1.exe.config
-D:\stazirovka\zadaacha1\zadaacha1\bin\Debug\zadaacha1.exe
-D:\stazirovka\zadaacha1\zadaacha1\bin\Debug\zadaacha1.pdb
-D:\stazirovka\zadaacha1\zadaacha1\obj\Debug\zadaacha1.csproj.AssemblyReference.cache
-D:\stazirovka\zadaacha1\zadaacha1\obj\Debug\zadaacha1.csproj.CoreCompileInputs.cache
-D:\stazirovka\zadaacha1\zadaacha1\obj\Debug\zadaacha1.exe
-D:\stazirovka\zadaacha1\zadaacha1\obj\Debug\zadaacha1.pdb
-D:\stazirovka\zadaacha1\zadaacha1\obj\Debug\zadaacha1.exe.config
