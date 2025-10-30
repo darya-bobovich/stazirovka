@@ -1,0 +1,8 @@
+D:\stazirovka\WordGame_Task1\WordGame_Task1\bin\Debug\WordGame_Task1.exe.config
+D:\stazirovka\WordGame_Task1\WordGame_Task1\bin\Debug\WordGame_Task1.exe
+D:\stazirovka\WordGame_Task1\WordGame_Task1\bin\Debug\WordGame_Task1.pdb
+D:\stazirovka\WordGame_Task1\WordGame_Task1\obj\Debug\WordGame_Task1.csproj.AssemblyReference.cache
+D:\stazirovka\WordGame_Task1\WordGame_Task1\obj\Debug\WordGame_Task1.csproj.CoreCompileInputs.cache
+D:\stazirovka\WordGame_Task1\WordGame_Task1\obj\Debug\WordGame_Task1.exe
+D:\stazirovka\WordGame_Task1\WordGame_Task1\obj\Debug\WordGame_Task1.pdb
+D:\stazirovka\WordGame_Task1\WordGame_Task1\obj\Debug\WordGame_Task1.exe.config
