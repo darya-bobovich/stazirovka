@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
-using System.Text.Json;
 using Newtonsoft.Json;
-
 
 namespace WordGame_Task1
 {
@@ -37,13 +33,16 @@ namespace WordGame_Task1
     /// </summary>
     public class PlayerStats
     {
-     
+
         public string Name { get; set; }
 
         public int GamesPlayed { get; set; }
 
         public int Wins { get; set; }
 
+        /// <summary>
+        /// Returns a string representation of player statistics in the specified language.
+        /// </summary>
         public string ToString(bool isRussian)
         {
             if (isRussian)
@@ -60,6 +59,7 @@ namespace WordGame_Task1
     {
         private readonly string _filePath = "scores.json";
         private GameData _gameData = new GameData();
+        private readonly object _saveLock = new object();
 
         /// <summary>
         /// Initializes a new ScoreManager and loads existing data.
@@ -204,7 +204,7 @@ namespace WordGame_Task1
         {
             try
             {
-                lock (this)
+                lock (_saveLock)
                 {
                     string json = JsonConvert.SerializeObject(_gameData, Formatting.Indented);
                     string tempFile = _filePath + ".tmp";
@@ -218,15 +218,27 @@ namespace WordGame_Task1
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving results: {ex.Message}");
-                try
-                {
-                    string backupFile = "scores_backup_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json";
-                    string json = JsonConvert.SerializeObject(_gameData, Formatting.Indented);
-                    File.WriteAllText(backupFile, json);
-                    Console.WriteLine($"Backup created: {backupFile}");
-                }
-                catch { }
+                System.Diagnostics.Debug.WriteLine($"Error saving results: {ex.Message}");
+                CreateBackup();
+            }
+        }
+
+        /// <summary>
+        /// Creates a backup file in case of save error.
+        /// </summary>
+        private void CreateBackup()
+        {
+            try
+            {
+                string backupFile = "scores_backup_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".json";
+                string json = JsonConvert.SerializeObject(_gameData, Formatting.Indented);
+                File.WriteAllText(backupFile, json);
+                System.Diagnostics.Debug.WriteLine($"Backup created: {backupFile}");
+            }
+            catch (Exception backupEx)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to create backup: {backupEx.Message}");
+                throw new IOException("Failed to save game data and create backup", backupEx);
             }
         }
 
@@ -248,8 +260,9 @@ namespace WordGame_Task1
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading results: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error loading results: {ex.Message}");
                 _gameData = new GameData();
+                throw;
             }
         }
 

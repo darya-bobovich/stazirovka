@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WordGame_Task1;
-
 namespace WordGame_Task1
 {
     /// <summary>
@@ -13,19 +7,9 @@ namespace WordGame_Task1
     [Serializable]
     public class Player : IEquatable<Player>
     {
-        /// <summary>
-        /// Gets or sets the player's name.
-        /// </summary>
+
         public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets total games played.
-        /// </summary>
         public int TotalGames { get; set; }
-
-        /// <summary>
-        /// Gets or sets total wins.
-        /// </summary>
         public int Wins { get; set; }
 
         /// <summary>

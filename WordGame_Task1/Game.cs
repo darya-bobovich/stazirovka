@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Timer = System.Timers.Timer;
-
 
 namespace WordGame_Task1
 {
@@ -21,6 +19,9 @@ namespace WordGame_Task1
         private bool _gameSavedOnExit = false;
         private object _saveLock = new object();
 
+        /// <summary>
+        /// Initializes a new instance of the Game class.
+        /// </summary>
         public Game(LanguageManager languageManager, IUserInterface ui, ScoreManager scoreManager)
         {
             _languageManager = languageManager;
@@ -29,6 +30,9 @@ namespace WordGame_Task1
             _scoreManager = scoreManager;
         }
 
+        /// <summary>
+        /// Starts the main game loop.
+        /// </summary>
         public void Start()
         {
             try
@@ -60,7 +64,7 @@ namespace WordGame_Task1
                     baseWord = ReadInput();
                 }
 
-                // Создаем сессию, но НЕ записываем в файл до окончания игры
+                // Create a session but DO NOT write to file until the game ends
                 _currentSession = new GameSession(baseWord, _player1Name, _player2Name);
                 _gameActive = true;
                 _gameSavedOnExit = false;
@@ -130,7 +134,7 @@ namespace WordGame_Task1
                     currentPlayerNumber = (currentPlayerNumber == 1) ? 2 : 1;
                 }
 
-                // После окончания игры ожидаем нажатия Enter
+                // After the game ends, wait for Enter press
                 if (!_gameActive)
                 {
                     _ui.WriteLine(_languageManager.GetText(
@@ -156,6 +160,9 @@ namespace WordGame_Task1
             }
         }
 
+        /// <summary>
+        /// Ends the game and declares a winner.
+        /// </summary>
         private void EndGame(string loserName, string reason)
         {
             _gameActive = false;
@@ -190,16 +197,17 @@ namespace WordGame_Task1
                 "═".PadRight(50, '═'),
                 "═".PadRight(50, '═')));
 
-            // Только сейчас записываем результат игры
+            // Only now record the game result
             _scoreManager.RecordGameResult(_currentSession);
             _gameSavedOnExit = true;
 
-            // Показываем статистику текущих игроков
+            // Show current players' statistics
             ProcessCommand("/score");
-
-        
         }
 
+        /// <summary>
+        /// Handles application exit by saving unfinished game state.
+        /// </summary>
         public void OnApplicationExit()
         {
             lock (_saveLock)
@@ -216,30 +224,30 @@ namespace WordGame_Task1
                             "Приложение было закрыто во время хода игрока " + loserName,
                             "Application was closed during " + loserName + "'s turn");
 
-                        Console.WriteLine("");
-                        Console.WriteLine(_languageManager.GetText(
+                        _ui.WriteLine("");
+                        _ui.WriteLine(_languageManager.GetText(
                             "═".PadRight(50, '═'),
                             "═".PadRight(50, '═')));
-                        Console.WriteLine(_languageManager.GetText(
+                        _ui.WriteLine(_languageManager.GetText(
                             "СОХРАНЕНИЕ ПРЕРВАННОЙ ИГРЫ",
                             "SAVING INTERRUPTED GAME"));
-                        Console.WriteLine(_languageManager.GetText(
+                        _ui.WriteLine(_languageManager.GetText(
                             $"Победитель: {winnerName}",
                             $"Winner: {winnerName}"));
-                        Console.WriteLine(_languageManager.GetText(
+                        _ui.WriteLine(_languageManager.GetText(
                             $"Проиграл: {loserName}",
                             $"Loser: {loserName}"));
-                        Console.WriteLine(_languageManager.GetText(
+                        _ui.WriteLine(_languageManager.GetText(
                             $"Причина: Приложение закрыто",
                             $"Reason: Application closed"));
-                        Console.WriteLine(_languageManager.GetText(
+                        _ui.WriteLine(_languageManager.GetText(
                             "═".PadRight(50, '═'),
                             "═".PadRight(50, '═')));
 
-                        // Форсируем сохранение
+                        // Force save the game result
                         _scoreManager.RecordGameResult(_currentSession);
 
-                        // Дополнительное сохранение для надежности
+                        // Additional save for reliability
                         _scoreManager.SaveScores();
 
                         _gameActive = false;
@@ -247,12 +255,15 @@ namespace WordGame_Task1
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Ошибка при сохранении результатов: {ex.Message}");
+                        _ui.WriteLine($"Ошибка при сохранении результатов: {ex.Message}");
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// Processes game commands entered by players.
+        /// </summary>
         private void ProcessCommand(string command)
         {
             try
@@ -286,6 +297,9 @@ namespace WordGame_Task1
             }
         }
 
+        /// <summary>
+        /// Displays all words used in the current game session.
+        /// </summary>
         private void ShowUsedWords()
         {
             if (_currentSession.UsedWords.Count == 0)
@@ -306,6 +320,9 @@ namespace WordGame_Task1
             }
         }
 
+        /// <summary>
+        /// Shows statistics for the two current players.
+        /// </summary>
         private void ShowCurrentPlayersStats()
         {
             try
@@ -333,6 +350,9 @@ namespace WordGame_Task1
             }
         }
 
+        /// <summary>
+        /// Shows statistics for all players in the system.
+        /// </summary>
         private void ShowAllPlayersStats()
         {
             try
@@ -372,8 +392,29 @@ namespace WordGame_Task1
             }
         }
 
+        /// <summary>
+        /// Reads a word input with a time limit.
+        /// </summary>
         private string ReadWordWithTimer(int seconds)
         {
+            // For ConsoleUI, use console-specific implementation
+            if (_ui is ConsoleUI consoleUi)
+            {
+                return ReadWordWithTimerConsole(seconds, consoleUi);
+            }
+            else
+            {
+                // Fallback for other UI implementations
+                return ReadWordWithTimerSimple(seconds);
+            }
+        }
+
+        /// <summary>
+        /// Console-specific implementation with real-time timer display.
+        /// </summary>
+        private string ReadWordWithTimerConsole(int seconds, ConsoleUI consoleUi)
+        {
+            // Используем оригинальную реализацию с Console
             int secondsLeft = seconds;
             StringBuilder buffer = new StringBuilder();
             bool timeExpired = false;
@@ -443,11 +484,71 @@ namespace WordGame_Task1
             Console.WriteLine();
 
             if (timeExpired && buffer.Length == 0)
-                return null; // Явный возврат null при истечении времени
+                return null;
 
-            return buffer.ToString().ToLower(); // Явный возврат строки
+            return buffer.ToString().ToLower();
         }
 
+        /// <summary>
+        /// Simple implementation for non-console UI.
+        /// </summary>
+       
+        private string ReadWordWithTimerSimple(int seconds)
+        {
+            int secondsLeft = seconds;
+            bool timeExpired = false;
+            /// <summary>
+            /// Start timer
+            /// </summary>
+            Timer timer = new Timer(1000);
+            timer.Elapsed += (s, e) =>
+            {
+                secondsLeft--;
+                if (secondsLeft <= 0)
+                {
+                    timeExpired = true;
+                    timer.Stop();
+                }
+                else
+                {   /// <summary>
+                    /// Update timer display
+                    /// </summary>
+                    _ui.Write($"\r{_languageManager.GetText("Осталось секунд: ", "Time left: ")}{secondsLeft} ");
+                }
+            };
+            timer.Start();
+            /// <summary>
+            /// Show initial timer
+            ///  </summary>
+            _ui.Write($"{_languageManager.GetText("Осталось секунд: ", "Time left: ")}{secondsLeft} ");
+
+            string input = null;
+            DateTime startTime = DateTime.Now;
+
+            try
+            {   
+                while (!timeExpired && (DateTime.Now - startTime).TotalSeconds < seconds)
+                {
+                
+                    Thread.Sleep(100);
+                }
+                if (timeExpired)
+                    return null;
+
+                input = _ui.ReadLine();
+            }
+            finally
+            {
+                timer.Stop();
+                _ui.WriteLine(""); 
+            }
+
+            return input?.Trim().ToLower();
+        }
+
+        /// <summary>
+        /// Reads user input with validation for non-empty strings.
+        /// </summary>
         private string ReadInput()
         {
             while (true)
@@ -456,13 +557,10 @@ namespace WordGame_Task1
 
                 if (!string.IsNullOrEmpty(input))
                 {
-                    return input; // Явный возврат при успешном вводе
+                    return input;
                 }
 
-                // Если пусто, продолжаем цикл
             }
         }
     }
 }
-
-

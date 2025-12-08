@@ -2,7 +2,6 @@
 using WordGame_Task1;
 using System.Runtime.InteropServices;
 
-
 namespace zadaacha1
 {
     /// <summary>
